@@ -1,6 +1,6 @@
 [MASTER]
 
-# Load the DocStringChecker plugin.
+# Load the line_length_linter plugin.
 load-plugins=line_length_lint
 
 # We disable all standard pylint checkers, and whitelist of line length from the line_length_linter.
