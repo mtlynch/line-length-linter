@@ -16,6 +16,8 @@ _TRIPLE_QUOTE_PATTERN = re.compile(r'(\'\'\'|\"\"\")')
 _STRING_PATTERN = re.compile(r'(\'.+\')|(\".+\")')
 # Matches a comment line.
 _COMMENT_PATTERN = re.compile(r'(^|\s)#')
+# Matches raw strings, for example r'whatever'.
+_RAW_STRING_PATTERN = re.compile(r'(r\'.+\')')
 
 
 class LineLengthChecker(checkers.BaseChecker):
@@ -24,6 +26,7 @@ class LineLengthChecker(checkers.BaseChecker):
     Line lengths are verified using the following rules:
         - Generally, lines should not exceed _LINE_LENGTH_MAX.
         - It is always okay to exceed this limit if the line contains a URL.
+        - Raw strings can exceed the limit.
         - Lines that are within a triple-quoted string may also exceed the limit
           if the triple-quoted string is not a docstring.
         - Only comments, docstrings, or lines containing a string are
@@ -59,11 +62,11 @@ class LineLengthChecker(checkers.BaseChecker):
 
     def _check_docstring(self, node):
         doc = node.doc
-        if doc:
-            lines = node.doc.split('\n')
-            for line_offset, line in enumerate(lines):
-                self._check_line_length(line, node.fromlineno + line_offset,
-                                        node)
+        if not doc:
+            return
+        lines = node.doc.split('\n')
+        for line_offset, line in enumerate(lines):
+            self._check_line_length(line, node.fromlineno + line_offset, node)
 
     def _process_module(self, node):
         """Check the line length of all lines of interest within a module.
@@ -78,7 +81,7 @@ class LineLengthChecker(checkers.BaseChecker):
             node: AST node object for the module.
         """
         with node.stream() as stream:
-            for (line_number, line) in enumerate(stream):
+            for line_number, line in enumerate(stream):
                 if _is_line_of_interest(line):
                     self._check_line_length(line, line_number, node)
 
@@ -90,12 +93,16 @@ class LineLengthChecker(checkers.BaseChecker):
             line_number: Zero-indexed line number of line.
             node: AST node that the line belongs to.
         """
-        if _over_line_length(line):
-            if not _contains_url(line):
-                if not _is_one_line_triple_quote(line):
-                    # We add 1 to the line number because arrays are 0 indexed
-                    # but line numbers are not.
-                    self.add_message('C0001', node=node, line=line_number + 1)
+        if not _over_line_length(line):
+            return
+        if _contains_url(line):
+            return
+        if _contains_a_raw_string(line):
+            return
+        if not _is_one_line_triple_quote(line):
+            # We add 1 to the line number because arrays are 0 indexed
+            # but line numbers are not.
+            self.add_message('C0001', node=node, line=line_number + 1)
 
 
 def _is_line_of_interest(line):
@@ -105,6 +112,10 @@ def _is_line_of_interest(line):
 
 def _is_one_line_triple_quote(line):
     return len(_TRIPLE_QUOTE_PATTERN.findall(line)) == 2
+
+
+def _contains_a_raw_string(line):
+    return _RAW_STRING_PATTERN.search(line)
 
 
 def _contains_a_string(line):

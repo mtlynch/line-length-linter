@@ -1,5 +1,7 @@
 import foo
 
+_TEST_RAW_STRING = r'Raw strings should not throw errors. It\'s okay for them to exceed the maximum line length.'
+
 
 class TestClass(object):
 
@@ -18,6 +20,5 @@ class TestClass(object):
         """
         A triple-quote string can be over the limit whether or not it contains a URL.
         """
-
         """A triple-quote string can be over the limit when it's on three lines or just one."""
-        return another_array
+        return an_array
