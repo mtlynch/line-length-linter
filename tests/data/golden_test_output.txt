@@ -1,0 +1,4 @@
+************* Module test_file_for_lint
+C:  8, 4: Lines should not be longer than 80 characters. (line-over-max-length)
+C:  6, 0: Lines should not be longer than 80 characters. (line-over-max-length)
+C:  9, 0: Lines should not be longer than 80 characters. (line-over-max-length)
