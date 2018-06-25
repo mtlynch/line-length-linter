@@ -78,7 +78,6 @@ class LineLengthChecker(checkers.BaseChecker):
             node: AST node object for the module.
         """
         with node.stream() as stream:
-            unbalanced_triple_quote_count = 0
             for (line_number, line) in enumerate(stream):
                 if _is_line_of_interest(line):
                     self._check_line_length(line, line_number, node)
