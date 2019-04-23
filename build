@@ -13,7 +13,13 @@ SOURCE_DIR=line_length_linter
 find . -name "*.pyc" -delete
 
 # Check that source has correct formatting.
-yapf --diff --recursive --style google ./ --exclude=./third_party/*
+yapf \
+  --diff \
+  --recursive \
+  --style google \
+  ./ \
+  --exclude=third_party/* \
+  --exclude=venv/*
 
 # Run static analysis for Python bugs/cruft.
 pyflakes "${SOURCE_DIR}/"
